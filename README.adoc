@@ -1,0 +1,13 @@
+= AMRAAM
+Nikolai Zimmermann
+:toc:
+
+_AMRAAM_ is a ArmA 3 Server Manager. Compatible with Arma 3 1.99+.
+
+== Description
+
+_AMRAAM_ does stuff and things.
+
+== License
+
+This work is licensed under link:LICENSE[MIT].

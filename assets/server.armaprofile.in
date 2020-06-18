@@ -1,0 +1,85 @@
+class DifficultyPresets
+\{
+    class CustomDifficulty
+    \{
+        class Options
+        \{
+            /* Simulation */
+
+            // Reduced damage
+            reducedDamage = {config.reduced_damage};
+
+            /* Situational awareness */
+
+            // Group indicators (0 = never, 1 = limited distance, 2 = always)
+            groupIndicators = {config.group_indicators};
+            // Friendly name tags (0 = never, 1 = limited distance, 2 = always)
+            friendlyTags = {config.friendly_tags};
+            // Enemy name tags (0 = never, 1 = limited distance, 2 = always)
+            enemyTags = {config.enemy_tags};
+            // Detected mines (0 = never, 1 = limited distance, 2 = always)
+            detectedMines = {config.detected_mines};
+            // Commands (0 = never, 1 = fade out, 2 = always)
+            commands = {config.commands};
+            // Waypoints (0 = never, 1 = fade out, 2 = always)
+            waypoints = {config.waypoints};
+            // Tactical ping (0 = disable, 1 = enable)
+            tacticalPing = {config.tactical_ping};
+
+            /* Personal awareness */
+
+            // Weapon info (0 = never, 1 = fade out, 2 = always)
+            weaponInfo = {config.weapon_info};
+            // Stance indicator (0 = never, 1 = fade out, 2 = always)
+            stanceIndicator = {config.stance_indicator};
+            // Stamina bar
+            staminaBar = {config.stamina_bar};
+            // Weapon crosshair
+            weaponCrosshair = {config.weapon_crosshair};
+            // Vision aid
+            visionAid = {config.vision_aid};
+
+            /* View */
+
+            // 3rd person view
+            thirdPersonView = {config.third_person_view};
+            // Camera shake
+            cameraShake = {config.camera_shake};
+
+            /* Multiplayer */
+
+            // Score table
+            scoreTable = {config.score_table};
+            // Killed by
+            deathMessages = {config.death_messages};
+            // VoN ID
+            vonID = {config.von_id};
+
+            /* Misc */
+
+            // Show friendly units on the map. (since Arma 3 v1.68)
+            mapContentFriendly = {config.map_content_friendly};
+            // Shows enemy units on the map. (since Arma 3 v1.68)
+            mapContentEnemies = {config.map_content_enemies}
+            // Shows detected mines on the map. (since Arma 3 v1.68)
+            mapContentMines = {config.map_content_mines};
+            // (former autoSpot) Automatic reporting of spotted enemied by
+            // players only. This doesn't have any effect on AIs.
+            autoReport = {config.auto_report};
+            // Allows player to create multiple saves in a mission.
+            multipleSaves = {config.multiple_saves};
+        };
+
+        // aiLevelPreset defines AI skill level and is counted from 0 and can
+        // have following values: 0 (Low), 1 (Normal), 2 (High), 3 (Custom).
+        // when 3 (Custom) is chosen, values of skill and precision are taken
+        // from the class CustomAILevel.
+        aiLevelPreset = {config.ai_level_preset};
+    };
+
+    class CustomAILevel
+    \{
+        skillAI = {config.skill_ai};
+        precisionAI = {config.precision_ai};
+    };
+};
