@@ -1,7 +1,11 @@
-use amraam::config::OptionSet;
-use amraam::settings::load_settings;
+use amraam::{
+    config::OptionSet,
+    modpack::{Modpack, ModpackConfig},
+    settings::load_settings,
+};
 use anyhow::{Context, Result};
 use clap::ArgMatches;
+use std::convert::TryInto;
 use std::process::Command;
 
 macro_rules! arg {
@@ -60,6 +64,14 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
     arg!(command, options.ex_threads, "exThreads");
     arg_bool!(command, options.enable_ht, "enableHT");
     arg_bool!(command, options.hugepages, "hugepages");
+
+    if let Some(modpack_name) = options.modpack {
+        let modpack_config: ModpackConfig = settings.get(&format!("modpack.{}", modpack_name))?;
+
+        let modpack: Modpack = modpack_config.try_into()?;
+
+        command.arg(format!("-mod={}", modpack.as_arg()));
+    }
 
     command.spawn()?;
 

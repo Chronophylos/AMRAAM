@@ -96,7 +96,7 @@ pub fn init(_matches: &ArgMatches) -> Result<()> {
 
     // install steamcmd
     term.write_line(&format!("\n[2/{}] Installing SteamCMD", STEPS))?;
-    install_steamcmd()?;
+    install_steamcmd().context("Could not install SteamCMD")?;
 
     // install arma server
     term.write_line(&format!("\n[3/{}] Installing Arma 3 via SteamCMD", STEPS))?;
@@ -198,21 +198,31 @@ fn install_steamcmd() -> Result<()> {
     info!("Installing steamcmd");
 
     match info.os_type() {
-        Debian | Ubuntu => install_steamcmd_debian(info.bitness()),
+        Debian => install_steamcmd_debian(info.bitness(), true)
+            .context("Could not install SteamCMD with Debian Strategy"),
+        Ubuntu => install_steamcmd_debian(info.bitness(), false)
+            .context("Could not install SteamCMD with Ubuntu/Debian Strategy"),
         _ => bail!("Cannot install steamcmd for this operating system."),
     }
 }
 
-static DEBIAN_PACKAGES: &'static [&'static str] = &["sudo", "steamcmd"];
+static DEBIAN_PACKAGES: &[&'static str] = &["sudo", "steamcmd"];
+static DEBIAN_REPOSITORY: &str = "non-free";
+static UBUNTU_REPOSITORY: &str = "multiverse";
 
-fn install_steamcmd_debian(bitness: os_info::Bitness) -> Result<()> {
+fn install_steamcmd_debian(bitness: os_info::Bitness, debian: bool) -> Result<()> {
     use os_info::Bitness;
+    let repository = if debian {
+        DEBIAN_REPOSITORY
+    } else {
+        UBUNTU_REPOSITORY
+    };
 
     match bitness {
         Bitness::X64 => {
             ensure!(
                 Command::new("add-apt-repository")
-                    .args(&["--yes", "multiverse"])
+                    .args(&["--yes", repository])
                     .status()
                     .context("Could not run add-apt-repository")?
                     .success(),

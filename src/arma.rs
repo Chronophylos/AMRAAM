@@ -7,6 +7,6 @@ pub struct Arma<'a> {
     profile: &'a Path,
     basic: &'a Path,
     server: &'a Path,
-    modpack: Modpack<'a>,
-    sever_modpack: Modpack<'a>,
+    modpack: Modpack,
+    sever_modpack: Modpack,
 }

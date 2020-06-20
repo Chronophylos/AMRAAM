@@ -1,12 +1,12 @@
 use anyhow::{bail, ensure, Context, Result};
 use std::process::Command;
 
-static ARMA_SERVER_APPID: &'static str = "233780";
-static ARMA_APPID: &'static str = "107410";
+static ARMA_SERVER_APPID: &str = "233780";
+static ARMA_APPID: &str = "107410";
 
 #[derive(Default)]
 pub struct SteamCmd<'a> {
-    user: &'a str,
+    sudo: &'a str,
     username: &'a str,
     password: Option<&'a str>,
     token: Option<&'a str>,
@@ -15,14 +15,14 @@ pub struct SteamCmd<'a> {
 
 impl<'a> SteamCmd<'a> {
     pub fn new(
-        user: &'a str,
+        sudo: &'a str,
         username: &'a str,
         password: &'a str,
         token: &'a str,
         install_dir: &'a str,
     ) -> Self {
         Self {
-            user,
+            sudo,
             username,
             password: Some(password),
             token: Some(token),
@@ -34,7 +34,7 @@ impl<'a> SteamCmd<'a> {
         let status = Command::new("sudo")
             .args(&[
                 "-iu",
-                self.user,
+                self.sudo,
                 SteamCmd::binary_path()?,
                 "+login",
                 self.username,
