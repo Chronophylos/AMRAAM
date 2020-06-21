@@ -6,7 +6,7 @@ use dialoguer::{Input, Password};
 use lazy_static::lazy_static;
 use pwd::Passwd;
 use std::{
-    fs::File,
+    fs::{self, File},
     io::prelude::*,
     os::unix::{fs::PermissionsExt, process::CommandExt},
     path::Path,
@@ -107,7 +107,7 @@ pub fn init(_matches: &ArgMatches) -> Result<()> {
     // save config
     term.write_line(&format!("[4/{}] Saving config", STEPS))?;
     let config_file = target_path.join("amraam.toml");
-    let serialized = toml::to_string_pretty(&settings)?;
+    let serialized = toml::to_string_pretty(&settings).context("Could not serialize config")?;
 
     let mut file = File::create(&config_file)?;
     let mut perms = file.metadata()?.permissions();

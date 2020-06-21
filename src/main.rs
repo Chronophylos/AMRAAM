@@ -21,27 +21,17 @@ fn main() -> Result<()> {
         .subcommand(SubCommand::with_name("init").about("Creates and installs a new server"))
         .subcommand(
             SubCommand::with_name("run")
-                .about("runs the current arma installation")
-                .arg(
-                    Arg::with_name("option set")
-                        .takes_value(true)
-                        .required(true),
-                ),
+                .about("Runs the current arma installation")
+                .arg(Arg::with_name("option set").takes_value(true)),
         )
         .subcommand(
-            SubCommand::with_name("update")
-                .about("Update or install the dedicated server or Steam Workshop mods")
+            SubCommand::with_name("mod")
+                .about("Manage mods")
                 .subcommand(
-                    SubCommand::with_name("server").about("Update or install the dedicated server"),
-                )
-                .subcommand(
-                    SubCommand::with_name("mods")
-                        .about("Update or install workshop mods")
-                        .arg(
-                            Arg::with_name("option set")
-                                .required(true)
-                                .help("Sets the option set to use when upating mods"),
-                        ),
+                    SubCommand::with_name("install")
+                        .about("Install a mod")
+                        .arg(Arg::with_name("path").required(true).takes_value(true).help("The path to the mod you want to install"))
+                        .arg(Arg::with_name("name").long("name").help("Set the mod name. If this option is not set the name is taken from the path.").takes_value(true)),
                 ),
         )
         .get_matches();

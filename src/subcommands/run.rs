@@ -1,9 +1,9 @@
 use amraam::{
     config::OptionSet,
     modpack::{Modpack, ModpackConfig},
-    settings::load_settings,
+    settings::Settings,
 };
-use anyhow::{Context, Result};
+use anyhow::{bail, ensure, Context, Result};
 use clap::ArgMatches;
 use std::convert::TryInto;
 use std::process::Command;
@@ -25,30 +25,52 @@ macro_rules! arg_bool {
 }
 
 pub fn run(matches: &ArgMatches) -> Result<()> {
-    let settings = load_settings(matches.value_of("config"))?;
+    let settings =
+        Settings::from_path(matches.value_of("config")).context("Could not load settings")?;
 
-    let options_name = matches.value_of("option set").unwrap();
+    let mut options = OptionSet::new();
 
-    // TODO: handle case when global is not set
-    let global_options: OptionSet = settings
-        .get("options.global")
-        .context("Could not get global options")?;
+    if let Some(globals) = settings
+        .get::<OptionSet>("options.global")
+        .context("Could not get global options")?
+    {
+        options.merge(globals)
+    }
 
-    let options = global_options.merge(
-        settings
+    if let Some(options_name) = matches.value_of("option set") {
+        if let Some(set) = settings
             .get(&format!("options.{}", options_name))
-            .context("Could not get provided option set from config")?,
-    );
+            .context("Could not get provided option set")?
+        {
+            options.merge(set)
+        } else {
+            bail!("Could nof find option set in config")
+        }
+    }
 
-    let mut command = Command::new("./arma3server");
+    let server_path = settings
+        .get_str("server.path")
+        .context("Could not read server path from config")?
+        .unwrap_or(String::from("./arma3"));
+
+    // allow changing
+    let server_binary = "./arma3serverprofiling_x64";
+
+    let arma_user = settings
+        .get_str("server.user")
+        .context("Could not get server user")?
+        .context("Missing server.user key in config")?;
+
+    let mut command = Command::new("sudo");
+    command.current_dir(server_path);
+    command.args(&["-u", &arma_user, &server_binary]);
 
     if let Some(name) = options.config {
-        command.arg(&format!(
-            "-config={}",
-            settings
-                .get_str(&format!("config.{}.path", name))
-                .context("Could not get config file path from config")?
-        ));
+        let config = settings
+            .get_str(&format!("config.{}.path", name))
+            .context("Could not get config file path from config")?
+            .unwrap_or_else(|| name);
+        command.arg(&format!("-config={}", config));
     }
 
     arg!(command, options.basic, "cfg");
@@ -66,14 +88,23 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
     arg_bool!(command, options.hugepages, "hugepages");
 
     if let Some(modpack_name) = options.modpack {
-        let modpack_config: ModpackConfig = settings.get(&format!("modpack.{}", modpack_name))?;
+        let modpack_config: ModpackConfig = settings
+            .get(&format!("modpack.{}", modpack_name))
+            .context("Could not get modpack from config")?
+            .context("Missing modpack config entry")?;
 
         let modpack: Modpack = modpack_config.try_into()?;
 
         command.arg(format!("-mod={}", modpack.as_arg()));
     }
 
-    command.spawn()?;
+    ensure!(
+        command
+            .status()
+            .context("Could not execute arma3server")?
+            .success(),
+        "Arma Server did not return sucessfully"
+    );
 
     Ok(())
 }
