@@ -1,4 +1,4 @@
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct OptionSet {
     pub port: Option<u16>,
     pub ranking: Option<String>,
@@ -23,8 +23,12 @@ macro_rules! merge {
 }
 
 impl OptionSet {
-    pub fn merge(&self, other: Self) -> Self {
-        Self {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn merge(&mut self, other: Self) {
+        *self = Self {
             port: merge!(self, other, port).or(Some(2302)),
             ranking: merge!(self, other, ranking),
             load_mission_to_memory: merge!(self, other, load_mission_to_memory).or(Some(true)),
