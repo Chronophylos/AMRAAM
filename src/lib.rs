@@ -5,8 +5,9 @@ extern crate serde_derive;
 #[macro_use]
 extern crate log;
 
-pub mod arma;
 pub mod config;
 pub mod modpack;
 pub mod settings;
 pub mod steamcmd;
+
+pub use settings::Settings;

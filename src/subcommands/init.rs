@@ -6,7 +6,7 @@ use dialoguer::{Input, Password};
 use lazy_static::lazy_static;
 use pwd::Passwd;
 use std::{
-    fs::{self, File},
+    fs::File,
     io::prelude::*,
     os::unix::{fs::PermissionsExt, process::CommandExt},
     path::Path,

@@ -1,7 +1,7 @@
 use amraam::{
     config::OptionSet,
     modpack::{Modpack, ModpackConfig},
-    settings::Settings,
+    Settings,
 };
 use anyhow::{bail, ensure, Context, Result};
 use clap::ArgMatches;
