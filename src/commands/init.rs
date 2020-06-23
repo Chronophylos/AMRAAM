@@ -1,6 +1,6 @@
-use amraam::steamcmd::SteamCmd;
+use crate::commands::prelude::*;
+use amraam::{steamcmd::SteamCmd, tools::chown};
 use anyhow::{bail, ensure, Context, Result};
-use clap::ArgMatches;
 use console::{Style, Term};
 use dialoguer::{Input, Password};
 use lazy_static::lazy_static;
@@ -29,7 +29,11 @@ pub enum InitError {
     PasswordInteract,
 }
 
-pub fn init(_matches: &ArgMatches) -> Result<()> {
+pub fn cli() -> App {
+    SubCommand::with_name("init").about("Creates and installs a new server")
+}
+
+pub fn exec(_matches: &ArgMatches) -> Result<()> {
     ensure!(
         console::user_attended(),
         "This command is interactively and shouldn't be used in a script"
@@ -118,7 +122,7 @@ pub fn init(_matches: &ArgMatches) -> Result<()> {
 
     // set ownership of all files
     term.write_line(&format!("[5/{}] Setting file permissions", STEPS))?;
-    chown(&config_file, &name, &name)?;
+    chown(&config_file, &name, true).context("Could not change ownership of path")?;
 
     Ok(())
 }
@@ -134,24 +138,6 @@ fn check_os() -> Result<()> {
             os
         ),
     }
-}
-
-fn chown<P>(path: P, user: &str, group: &str) -> Result<()>
-where
-    P: AsRef<Path>,
-{
-    let status = Command::new("chown")
-        .args(&[
-            "--recursive",
-            &format!("{}:{}", user, group),
-            path.as_ref().to_str().unwrap(),
-        ])
-        .status()
-        .context("Could not execute chown")?;
-
-    ensure!(status.success(), "chown did not return successfully");
-
-    Ok(())
 }
 
 fn create_user(name: &str) -> Result<()> {

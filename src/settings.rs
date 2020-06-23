@@ -124,4 +124,11 @@ impl Settings {
             Err(err) => Err(err).context(SettingsError::GetArray),
         }
     }
+
+    pub fn get_server_path(&self) -> Result<String> {
+        Ok(self
+            .get_str("server.path")
+            .context("Could not read key `server.path`")?
+            .unwrap_or(String::from("./arma3")))
+    }
 }

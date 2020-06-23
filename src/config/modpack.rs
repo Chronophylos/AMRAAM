@@ -11,9 +11,9 @@ struct ModContainer<'a> {
 
 #[derive(Clone)]
 pub struct Mod {
-    path: String,
-    name: String,
-    id: Option<String>,
+    pub path: String,
+    pub name: String,
+    pub id: Option<String>,
 }
 
 #[derive(Deserialize, Clone)]
@@ -71,7 +71,7 @@ impl ModpackConfig {
             .iter()
             .map(|container| {
                 let id = container.link.split("=").last().context("Missing id")?;
-                let path = format!("mods/@{}", id);
+                let path = format!("mods/{}", id);
 
                 Ok(Mod {
                     path,
@@ -90,7 +90,7 @@ impl ModpackConfig {
 pub struct Modpack(Vec<Mod>);
 
 impl Modpack {
-    fn as_vec(&self) -> Vec<Mod> {
+    pub fn as_vec(&self) -> Vec<Mod> {
         self.0.clone()
     }
 
@@ -115,7 +115,7 @@ impl TryFrom<ModpackConfig> for Modpack {
             .into_iter()
             // create Mod from String
             .map(|s| Mod {
-                path: format!("mods/@{}", &s),
+                path: format!("mods/{}", &s),
                 name: s,
                 id: None,
             })

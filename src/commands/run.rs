@@ -1,12 +1,14 @@
+use crate::commands::prelude::*;
 use amraam::{
-    config::OptionSet,
-    modpack::{Modpack, ModpackConfig},
+    config::{
+        modpack::{Mod, Modpack, ModpackConfig},
+        OptionSet,
+    },
+    util::list_mods,
     Settings,
 };
 use anyhow::{bail, ensure, Context, Result};
-use clap::ArgMatches;
-use std::convert::TryInto;
-use std::process::Command;
+use std::{convert::TryInto, path::Path, process::Command};
 
 macro_rules! arg {
     ($command:expr, $option:expr, $arg:expr) => {
@@ -24,7 +26,13 @@ macro_rules! arg_bool {
     };
 }
 
-pub fn run(matches: &ArgMatches) -> Result<()> {
+pub fn cli() -> App {
+    SubCommand::with_name("run")
+        .about("Runs the current arma installation")
+        .arg(Arg::with_name("option set").takes_value(true))
+}
+
+pub fn exec(matches: &ArgMatches) -> Result<()> {
     let settings =
         Settings::from_path(matches.value_of("config")).context("Could not load settings")?;
 
@@ -49,9 +57,8 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
     }
 
     let server_path = settings
-        .get_str("server.path")
-        .context("Could not read server path from config")?
-        .unwrap_or(String::from("./arma3"));
+        .get_server_path()
+        .context("Could not get server path from config")?;
 
     // allow changing
     let server_binary = "./arma3serverprofiling_x64";
@@ -62,7 +69,7 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
         .context("Missing server.user key in config")?;
 
     let mut command = Command::new("sudo");
-    command.current_dir(server_path);
+    command.current_dir(&server_path);
     command.args(&["-u", &arma_user, &server_binary]);
 
     if let Some(name) = options.config {
@@ -94,6 +101,27 @@ pub fn run(matches: &ArgMatches) -> Result<()> {
             .context("Missing modpack config entry")?;
 
         let modpack: Modpack = modpack_config.try_into()?;
+
+        let mods_path = Path::new(&server_path).join("mods");
+        let installed_mods = list_mods(&mods_path)?;
+
+        let missing_mods: Vec<Mod> = modpack
+            .as_vec()
+            .iter()
+            .filter(|&m| !installed_mods.contains(&m.name))
+            .map(|m| m.clone())
+            .collect();
+
+        if !missing_mods.is_empty() {
+            bail!(
+                "Cannot run server since some mods are missing:\n{}",
+                missing_mods
+                    .iter()
+                    .map(|m| m.name.clone())
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            )
+        }
 
         command.arg(format!("-mod={}", modpack.as_arg()));
     }

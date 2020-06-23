@@ -1,6 +1,7 @@
 mod option_set;
 
 pub mod basic;
+pub mod modpack;
 pub mod profile;
 pub mod server;
 
@@ -16,6 +17,7 @@ pub fn format(value: &Value, output: &mut String) -> tinytemplate::error::Result
 }
 
 pub use basic::BasicConfig;
+pub use modpack::Modpack;
 pub use option_set::OptionSet;
 pub use profile::Profile;
 pub use server::ServerConfig;
