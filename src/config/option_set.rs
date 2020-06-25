@@ -8,6 +8,7 @@ pub struct OptionSet {
     pub ex_threads: Option<u8>,
     pub enable_ht: Option<bool>,
     pub hugepages: Option<bool>,
+    pub auto_init: Option<bool>,
 
     pub basic: Option<String>,
     pub config: Option<String>,
@@ -43,6 +44,7 @@ impl OptionSet {
             ex_threads: merge!(self, other, ex_threads),
             enable_ht: merge!(self, other, enable_ht),
             hugepages: merge!(self, other, hugepages),
+            auto_init: merge!(self, other, auto_init),
 
             basic: merge!(self, other, basic),
             config: merge!(self, other, config),
