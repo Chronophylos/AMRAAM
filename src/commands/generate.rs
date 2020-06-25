@@ -99,8 +99,7 @@ fn generate_basic(settings: Settings, name: &str, args: &ArgMatches) -> Result<(
         .get_server_path()
         .context("Could not get server path from config")?;
 
-    let config_dir_path = Path::new(&server_path).join("config");
-    let config_path = config_dir_path.join(&format!("{}.cfg", name));
+    let config_path = Path::new(&server_path).join(&format!("{}.cfg", name));
 
     if config_path.exists() && !args.is_present("force") {
         bail!("Config already exists. If you want to overwrite this file pass --force");
@@ -110,21 +109,6 @@ fn generate_basic(settings: Settings, name: &str, args: &ArgMatches) -> Result<(
         .get_str("server.user")
         .context("Could not get server user from config")?
         .context("Missing config key server.user")?;
-
-    if !config_dir_path.exists() {
-        stdout
-            .write_line(&format!(
-                " {} config directory",
-                style("Creating").blue().bold()
-            ))
-            .context(GenerateError::WriteLine)?;
-
-        create_dir_all(&config_dir_path).context("Could not create config_dir directory")?;
-        chown(&config_dir_path, &user, true).context(GenerateError::Chown)?;
-        chmod(&config_dir_path, 0o755, 0o644, true).context(GenerateError::Chmod)?;
-
-        stdout.write_line("").context(GenerateError::WriteLine)?;
-    }
 
     let mut config = BasicConfig::default();
 
@@ -248,8 +232,7 @@ fn generate_server(settings: Settings, name: &str, args: &ArgMatches) -> Result<
         .get_server_path()
         .context("Could not get server path from config")?;
 
-    let config_dir_path = Path::new(&server_path).join("config");
-    let config_path = config_dir_path.join(&format!("{}.cfg", name));
+    let config_path = Path::new(&server_path).join(&format!("{}.cfg", name));
 
     if config_path.exists() && !args.is_present("force") {
         bail!("Config already exists. If you want to overwrite this file pass --force");
@@ -259,21 +242,6 @@ fn generate_server(settings: Settings, name: &str, args: &ArgMatches) -> Result<
         .get_str("server.user")
         .context("Could not get server user from config")?
         .context("Missing config key server.user")?;
-
-    if !config_dir_path.exists() {
-        stdout
-            .write_line(&format!(
-                " {} config directory",
-                style("Creating").blue().bold()
-            ))
-            .context(GenerateError::WriteLine)?;
-
-        create_dir_all(&config_dir_path).context("Could not create config_dir directory")?;
-        chown(&config_dir_path, &user, true).context(GenerateError::Chown)?;
-        chmod(&config_dir_path, 0o755, 0o644, true).context(GenerateError::Chmod)?;
-
-        stdout.write_line("").context(GenerateError::WriteLine)?;
-    }
 
     let mut config = ServerConfig::default();
 

@@ -16,9 +16,9 @@ macro_rules! arg {
             $command.arg(&format!("-{}={}", $arg, name));
         }
     };
-    ($command:expr, $option:expr, $arg:expr, $pre:expr, $ext:expr) => {
+    ($command:expr, $option:expr, $arg:expr, $ext:expr) => {
         if let Some(name) = $option {
-            $command.arg(&format!("-{}={}{}{}", $arg, $pre, name, $ext));
+            $command.arg(&format!("-{}={}{}", $arg, name, $ext));
         }
     };
 }
@@ -82,10 +82,10 @@ pub fn exec(matches: &ArgMatches) -> Result<()> {
             .get_str(&format!("config.{}.path", name))
             .context("Could not get config file path from config")?
             .unwrap_or_else(|| name);
-        command.arg(&format!("-config=config/{}.cfg", config));
+        command.arg(&format!("-config={}.cfg", config));
     }
 
-    arg!(command, options.basic, "cfg", "config/", ".cfg");
+    arg!(command, options.basic, "cfg", ".cfg");
     arg!(command, options.port, "port");
     arg!(command, options.ranking, "ranking");
     arg_bool!(
@@ -98,6 +98,7 @@ pub fn exec(matches: &ArgMatches) -> Result<()> {
     arg!(command, options.ex_threads, "exThreads");
     arg_bool!(command, options.enable_ht, "enableHT");
     arg_bool!(command, options.hugepages, "hugepages");
+    arg_bool!(command, options.auto_init, "autoInit");
 
     if let Some(modpack_name) = options.modpack {
         let modpack_config: ModpackConfig = settings
