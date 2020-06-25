@@ -100,37 +100,25 @@ pub fn exec(matches: &ArgMatches) -> Result<()> {
     arg_bool!(command, options.hugepages, "hugepages");
     arg_bool!(command, options.auto_init, "autoInit");
 
+    let mut mods = Vec::new();
+
     if let Some(modpack_name) = options.modpack {
-        let modpack_config: ModpackConfig = settings
-            .get(&format!("modpack.{}", modpack_name))
-            .context("Could not get modpack from config")?
-            .context("Missing modpack config entry")?;
+        let mut modpack = load_modpack(&settings, &modpack_name, &server_path)?;
+        mods.append(&mut modpack.mods);
 
-        let modpack: Modpack = modpack_config.try_into()?;
-
-        let mods_path = Path::new(&server_path).join("mods");
-        let installed_mods = list_mods(&mods_path)?;
-
-        let missing_mods: Vec<Mod> = modpack
-            .as_vec()
-            .iter()
-            .filter(|&m| !installed_mods.contains(&m.name))
-            .map(|m| m.clone())
-            .collect();
-
-        if !missing_mods.is_empty() {
-            bail!(
-                "Cannot run server since some mods are missing:\n{}",
-                missing_mods
-                    .iter()
-                    .map(|m| m.name.clone())
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            )
+        for name in modpack.inherit {
+            let mut modpack = load_modpack(&settings, &name, &server_path)?;
+            mods.append(&mut modpack.mods);
         }
-
-        command.arg(format!("-mod={}", modpack.as_arg()));
     }
+
+    command.arg(format!(
+        "-mod={}",
+        mods.iter()
+            .map(|m| m.path.clone())
+            .collect::<Vec<String>>()
+            .join(";")
+    ));
 
     ensure!(
         command
@@ -141,4 +129,36 @@ pub fn exec(matches: &ArgMatches) -> Result<()> {
     );
 
     Ok(())
+}
+
+fn load_modpack(settings: &Settings, name: &str, server_path: &str) -> Result<Modpack> {
+    let modpack_config: ModpackConfig = settings
+        .get(&format!("modpack.{}", name))
+        .context("Could not get modpack from config")?
+        .context("Missing modpack config entry")?;
+
+    let modpack: Modpack = modpack_config.as_modpack()?;
+
+    let mods_path = Path::new(&server_path).join("mods");
+    let installed_mods = list_mods(&mods_path)?;
+
+    let missing_mods: Vec<Mod> = modpack
+        .mods
+        .iter()
+        .filter(|&m| !installed_mods.contains(&m.name))
+        .map(|m| m.clone())
+        .collect();
+
+    if !missing_mods.is_empty() {
+        bail!(
+            "Cannot run server since some mods are missing:\n{}",
+            missing_mods
+                .iter()
+                .map(|m| m.name.clone())
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
+    }
+
+    Ok(modpack)
 }

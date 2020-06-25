@@ -1,6 +1,6 @@
 use anyhow::{ensure, Context, Result};
 use roxmltree::{Document, Node};
-use std::{convert::TryFrom, fs::File, io::prelude::*};
+use std::{fs::File, io::prelude::*};
 
 #[derive(Debug)]
 struct ModContainer<'a> {
@@ -18,15 +18,16 @@ pub struct Mod {
 
 #[derive(Deserialize, Clone)]
 pub struct ModpackConfig {
+    inherit: Option<Vec<String>>,
     mods: Option<Vec<String>>,
     path: Option<String>,
     url: Option<String>,
 }
 
 impl ModpackConfig {
-    pub fn load_path(self) -> Result<Vec<Mod>> {
+    pub fn load_path(&self) -> Result<Vec<Mod>> {
         ensure!(self.path.is_some(), "Path to html file is not set");
-        let path = self.path.unwrap();
+        let path = self.path.clone().unwrap();
 
         let mut file = File::open(path).context("Could not open html file")?;
         let mut buf = String::new();
@@ -85,29 +86,9 @@ impl ModpackConfig {
     pub fn load_url(self) -> Result<Vec<Mod>> {
         todo!()
     }
-}
 
-pub struct Modpack(Vec<Mod>);
-
-impl Modpack {
-    pub fn as_vec(&self) -> Vec<Mod> {
-        self.0.clone()
-    }
-
-    pub fn as_arg<'a>(&self) -> String {
-        self.as_vec()
-            .iter()
-            .map(|m| m.path.clone())
-            .collect::<Vec<String>>()
-            .join(";")
-    }
-}
-
-impl TryFrom<ModpackConfig> for Modpack {
-    type Error = anyhow::Error;
-
-    fn try_from(mc: ModpackConfig) -> Result<Self> {
-        let mods = mc
+    pub fn as_modpack(&self) -> Result<Modpack> {
+        let mods = self
             .mods
             .clone()
             // create empty vector if there are no strings
@@ -121,10 +102,8 @@ impl TryFrom<ModpackConfig> for Modpack {
             })
             .chain(
                 // get mods from load_path if there are any
-                if mc.path.is_some() {
-                    mc.clone()
-                        .load_path()
-                        .context("Could not load mods from file")?
+                if self.path.is_some() {
+                    self.load_path().context("Could not load mods from file")?
                 } else {
                     Vec::new()
                 }
@@ -132,8 +111,10 @@ impl TryFrom<ModpackConfig> for Modpack {
             )
             .chain(
                 // get mods from load_url if there are any
-                if mc.url.is_some() {
-                    mc.load_url().context("Could not load mods from url")?
+                if self.url.is_some() {
+                    self.clone()
+                        .load_url()
+                        .context("Could not load mods from url")?
                 } else {
                     Vec::new()
                 }
@@ -141,6 +122,14 @@ impl TryFrom<ModpackConfig> for Modpack {
             )
             .collect();
 
-        Ok(Modpack(mods))
+        Ok(Modpack {
+            mods,
+            inherit: self.inherit.clone().unwrap_or(Vec::new()),
+        })
     }
+}
+
+pub struct Modpack {
+    pub mods: Vec<Mod>,
+    pub inherit: Vec<String>,
 }
