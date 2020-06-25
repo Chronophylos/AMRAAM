@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use console::style;
 use indicatif::ProgressBar;
 use nix::unistd::{self, User};
 use std::{
@@ -32,7 +33,10 @@ where
                 .context("Could not change ownership of file")?;
         }
 
-        bar.finish_with_message("Finished changing ownership");
+        bar.finish_with_message(&format!(
+            "{} changing ownership",
+            style("Finished").green().bold()
+        ));
     } else {
         debug!("Changing ownership of {} to {}", path.display(), user.name);
 
@@ -75,7 +79,10 @@ where
             set_permissions(&path, perms.clone()).context("Could not set permission of path")?;
         }
 
-        bar.finish_with_message("Finished changing permissions");
+        bar.finish_with_message(&format!(
+            "{} changing permissions",
+            style("Finished").green().bold()
+        ));
     } else {
         let perms = if path.is_file() {
             file_perms
@@ -119,7 +126,10 @@ where
             fs::rename(path, new_path).context("Could not rename path")?;
         }
 
-        bar.finish_with_message("Finished renaming files");
+        bar.finish_with_message(&format!(
+            "{} renaming files",
+            style("Finished").green().bold()
+        ));
     } else {
         let new_path = path
             .to_str()

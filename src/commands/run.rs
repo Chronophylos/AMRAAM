@@ -16,6 +16,11 @@ macro_rules! arg {
             $command.arg(&format!("-{}={}", $arg, name));
         }
     };
+    ($command:expr, $option:expr, $arg:expr, $pre:expr, $ext:expr) => {
+        if let Some(name) = $option {
+            $command.arg(&format!("-{}={}{}{}", $arg, $pre, name, $ext));
+        }
+    };
 }
 
 macro_rules! arg_bool {
@@ -77,10 +82,10 @@ pub fn exec(matches: &ArgMatches) -> Result<()> {
             .get_str(&format!("config.{}.path", name))
             .context("Could not get config file path from config")?
             .unwrap_or_else(|| name);
-        command.arg(&format!("-config={}", config));
+        command.arg(&format!("-config=config/{}.cfg", config));
     }
 
-    arg!(command, options.basic, "cfg");
+    arg!(command, options.basic, "cfg", "config/", ".cfg");
     arg!(command, options.port, "port");
     arg!(command, options.ranking, "ranking");
     arg_bool!(

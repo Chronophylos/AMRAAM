@@ -11,7 +11,7 @@ password = "{config.password}";
 passwordAdmin = "{config.password_admin}";
 
 // Tells ArmA-server where the logfile should go and what it should be called
-logFile = "{config.log_file}";
+{{ if not config.log_file }}//{{ endif }}logFile = "{config.log_file}";
 
 // WELCOME MESSAGE ("message of the day")
 motd[] = \{
@@ -32,7 +32,7 @@ admins[] = \{{{ for admin in config.admins }}"{admin}"{{ if not @last }}, {{ end
 steamProtocolMaxDataSize = {config.steam_protocol_max_data_size};
 
 // default 1, allows to opt-out of analytics for the server by using 0
-statisticsEnabled = {config.statistics_enabled}
+statisticsEnabled = {config.statistics_enabled};
 
 
 // JOINING RULES
@@ -110,7 +110,7 @@ allowedHTMLLoadExtensions[] = \{{{ for ext in config.allowed_html_load_extension
 // player). 1 - forced AFM, 2 - forced SFM.
 forceRotorLibSimulation = {config.force_rotor_lib_simulation};
 
-forcedDifficulty = "{config.forced_difficulty}"
+forcedDifficulty = "{config.forced_difficulty}";
 
 // TIMEOUTS
 

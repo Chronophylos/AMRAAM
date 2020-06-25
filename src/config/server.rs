@@ -107,31 +107,31 @@ pub enum Difficulty {
 
 #[derive(Serialize)]
 pub struct ServerConfig<'a> {
-    pub hostname: &'a str,
-    pub password: &'a str,
-    pub password_admin: &'a str,
-    pub log_file: &'a str,
-    pub motd: &'a [&'a str],
+    pub hostname: String,
+    pub password: String,
+    pub password_admin: String,
+    pub log_file: Option<String>,
+    pub motd: Vec<String>,
     pub motd_interval: u16,
-    pub admins: &'a [&'a str],
+    pub admins: Vec<String>,
     pub steam_protocol_max_data_size: u16,
     pub max_players: u8,
     pub kick_duplicate: bool,
     pub verify_signatures: SignatureVerification,
     pub allowed_file_patching: FilePatching,
-    pub file_patching_exceptions: &'a [&'a str],
-    pub required_build: &'a str,
+    pub file_patching_exceptions: Vec<String>,
+    pub required_build: String,
     pub vote_mission_players: u8,
-    pub vote_threshold: &'a str,
+    pub vote_threshold: String,
     pub disable_von: bool,
     pub von_codec: VonCodec,
     pub von_codec_quality: u8,
     pub persistent: bool,
     pub timestamp_format: TimestampFormat,
     pub battleye: bool,
-    pub allowed_load_file_extensions: &'a [&'a str],
-    pub allowed_preprocess_file_extensions: &'a [&'a str],
-    pub allowed_html_load_extensions: &'a [&'a str],
+    pub allowed_load_file_extensions: Vec<String>,
+    pub allowed_preprocess_file_extensions: Vec<String>,
+    pub allowed_html_load_extensions: Vec<String>,
     pub disconnect_timeout: u16,
     pub max_desync: u16,
     pub max_ping: u16,
@@ -146,17 +146,17 @@ pub struct ServerConfig<'a> {
     pub force_rotor_lib_simulation: RotorLibSimulation,
     pub statistics_enabled: bool,
     pub forced_difficulty: Difficulty,
-    pub mission_whitelist: &'a [&'a str],
+    pub mission_whitelist: Vec<String>,
 }
 
 impl Default for ServerConfig<'_> {
     fn default() -> Self {
         Self {
-            hostname: "Fun and Test Server",
-            password: "",
-            password_admin: "xyz",
-            log_file: "server_console.log",
-            motd: &[
+            hostname: "Fun and Test Server".into(),
+            password: "".into(),
+            password_admin: "xyz".into(),
+            log_file: None,
+            motd: [
                 "",
                 "",
                 "Two empty lines above for increasing interval",
@@ -167,33 +167,45 @@ impl Default for ServerConfig<'_> {
                 "http://www.example.com",
                 "One more empty line below for increasing interval",
                 "",
-            ],
+            ]
+            .iter()
+            .map(|&s| String::from(s))
+            .collect(),
             motd_interval: 5,
-            admins: &[],
+            admins: Vec::new(),
             steam_protocol_max_data_size: 1024,
             max_players: 16,
             kick_duplicate: true,
             verify_signatures: SignatureVerification::V2Only,
             allowed_file_patching: FilePatching::Disallow,
-            file_patching_exceptions: &[],
-            required_build: "0",
+            file_patching_exceptions: Vec::new(),
+            required_build: "0".into(),
             vote_mission_players: 1,
-            vote_threshold: "0.33",
+            vote_threshold: "0.33".into(),
             disable_von: false,
             von_codec: VonCodec::OPUS,
             von_codec_quality: 30,
             persistent: true,
             timestamp_format: TimestampFormat::Short,
-            battleye: true,
-            allowed_load_file_extensions: &[
+            battleye: false,
+            allowed_load_file_extensions: [
                 "hpp", "sqs", "sqf", "fsm", "cpp", "paa", "txt", "xml", "inc", "ext", "sqm", "ods",
                 "fxy", "lip", "csv", "kb", "bik", "bikb", "html", "htm", "biedi",
-            ],
-            allowed_preprocess_file_extensions: &[
+            ]
+            .iter()
+            .map(|&s| String::from(s))
+            .collect(),
+            allowed_preprocess_file_extensions: [
                 "hpp", "sqs", "sqf", "fsm", "cpp", "paa", "txt", "xml", "inc", "ext", "sqm", "ods",
                 "fxy", "lip", "csv", "kb", "bik", "bikb", "html", "htm", "biedi",
-            ],
-            allowed_html_load_extensions: &["htm", "html", "xml", "txt"],
+            ]
+            .iter()
+            .map(|&s| String::from(s))
+            .collect(),
+            allowed_html_load_extensions: ["htm", "html", "xml", "txt"]
+                .iter()
+                .map(|&s| String::from(s))
+                .collect(),
             disconnect_timeout: 5,
             max_desync: 150,
             max_ping: 200,
@@ -240,9 +252,9 @@ impl Default for ServerConfig<'_> {
             },
             lobby_idle_timeout: 300,
             force_rotor_lib_simulation: RotorLibSimulation::Ignore,
-            statistics_enabled: true,
+            statistics_enabled: false,
             forced_difficulty: Difficulty::Regular,
-            mission_whitelist: &[],
+            mission_whitelist: Vec::new(),
         }
     }
 }

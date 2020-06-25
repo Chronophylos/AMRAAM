@@ -6,19 +6,19 @@ use std::path::Path;
 use tinytemplate::TinyTemplate;
 
 #[derive(Serialize)]
-pub struct BasicConfig<'a> {
-    max_msg_send: u16,
-    max_size_guaranteed: u16,
-    max_size_nonguaranteed: u16,
-    min_bandwidth: u32,
-    max_bandwidth: u32,
+pub struct BasicConfig {
+    pub max_msg_send: u16,
+    pub max_size_guaranteed: u16,
+    pub max_size_nonguaranteed: u16,
+    pub min_bandwidth: u32,
+    pub max_bandwidth: u32,
     // floats are annoying to format
-    min_error_to_send: &'a str,
-    min_error_to_send_near: &'a str,
-    max_custom_file_size: u32,
+    pub min_error_to_send: String,
+    pub min_error_to_send_near: String,
+    pub max_custom_file_size: u32,
 }
 
-impl Default for BasicConfig<'_> {
+impl Default for BasicConfig {
     fn default() -> Self {
         Self {
             max_msg_send: 128,
@@ -26,8 +26,8 @@ impl Default for BasicConfig<'_> {
             max_size_nonguaranteed: 256,
             min_bandwidth: 131072,
             max_bandwidth: 125000000,
-            min_error_to_send: "0.001",
-            min_error_to_send_near: "0.01",
+            min_error_to_send: "0.001".into(),
+            min_error_to_send_near: "0.01".into(),
             max_custom_file_size: 0,
         }
     }
@@ -36,10 +36,10 @@ impl Default for BasicConfig<'_> {
 #[derive(Serialize)]
 struct Context<'a> {
     timestamp: String,
-    config: &'a BasicConfig<'a>,
+    config: &'a BasicConfig,
 }
 
-impl BasicConfig<'_> {
+impl BasicConfig {
     pub fn generate<P>(&self, path: P) -> Result<()>
     where
         P: AsRef<Path>,
